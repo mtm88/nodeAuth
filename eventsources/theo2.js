@@ -31,7 +31,7 @@ exports.process = function(req, res) {
     let contentArray = [];
     let processedPages = 0;
     let pageLinkToProcess = 1;
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise((resolve) => {
     for (let i = 1; i <= lastPage; i++) {
         //pages on this website switch on adding 24 each page -> /index/0, /index/24, /index/48
         console.log(`processing page: ${i}`);
