@@ -8,7 +8,9 @@
     "cheerio": "latest",
     "express": "latest",
     "moment": "^2.14.1",
+    "phantom": "^2.1.15",
     "promise": "^7.1.1",
-    "request": "latest"
+    "request": "latest",
+    "underscore": "^1.8.3"
   }
 }
