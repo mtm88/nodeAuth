@@ -11,7 +11,8 @@ const phantom = require('phantom');
 exports.process = function(req, res) {
 
 
-let pagesCount = 1;
+let pagesCount = 0;
+let lastPage = 1;
 let contentArray = [];
 
 
@@ -36,20 +37,41 @@ phantom.create()
     })
     .then(content => {
         const $ = cheerio.load(content);
+        const tempPagesArray = [];
+        const pagination = $('.thedmsBrowsePagination').first().children();
+        pagination.each((index, element) => {
+            tempPagesArray.push($(element).text());
+        });
+        const pagesArray = tempPagesArray.filter((n) => { return !isNaN(n) });
+        lastPage = pagesArray[pagesArray.length - 1];
+        console.log(`setting last page to ${lastPage}`);
+
         const infoFrame = $('#thedmsMain').children('#thedmsListings').children('.thedmsBrowseRow');
-        console.log(infoFrame);
         console.log(`length of events: ${infoFrame.length}`);
-        if (infoFrame.length > 0) {
-            processResults(infoFrame)
-                .then(() => {
-                    console.log(`page ${pagesCount} completed`);
-                    pagesCount++;
+
+        processResults(infoFrame)
+            .then(() => {
+                console.log(`page ${pagesCount} completed`);
+                pagesCount++;
+                if (pagesCount === lastPage || lastPage === undefined) {
+                    console.log(`last page: ${pagesCount}`);
+                    res.json(contentArray);
+                } else {
                     processEvents(pagesCount);
-                });
-        }   else {
-            console.log(`last page: ${pagesCount}`);
-            res.json(contentArray);
-        }
+                }
+            })
+
+        // if (infoFrame.length > 0) {
+        //     processResults(infoFrame)
+        //         .then(() => {
+        //             console.log(`page ${pagesCount} completed`);
+        //             pagesCount++;
+        //             processEvents(pagesCount);
+        //         });
+        // }   else {
+        //     console.log(`last page: ${pagesCount}`);
+        //     res.json(contentArray);
+        // }
 
         sitepage.close();
         phInstance.exit();
@@ -68,61 +90,65 @@ function processResults(infoFrame) {
     const promise = new Promise((resolve) => {
     
         const $ = cheerio.load(infoFrame);
+        if (infoFrame.length > 0) {
+            infoFrame.each((index, element) => {
 
-        infoFrame.each((index, element) => {
+                const tempTitle = $(element).children('.dms1120').children('.thedmsContentHolder').children('.thedmsBrowseH2Background')
+                .children('h2').children('a').text();
+                const title = tempTitle.slice(0, tempTitle.indexOf('at'));
+                const location = tempTitle.slice(tempTitle.indexOf('at') + 3);
+                const eventLink = $(element).children('.dms1120').children('.thedmsContentHolder').children('.thedmsBrowseH2Background')
+                .children('h2').children('a').attr('href');
 
-            const tempTitle = $(element).children('.dms1120').children('.thedmsContentHolder').children('.thedmsBrowseH2Background')
-            .children('h2').children('a').text();
-            const title = tempTitle.slice(0, tempTitle.indexOf('at'));
-            const location = tempTitle.slice(tempTitle.indexOf('at') + 3);
-            const eventLink = $(element).children('.dms1120').children('.thedmsContentHolder').children('.thedmsBrowseH2Background')
-            .children('h2').children('a').attr('href');
+                const tempDate = $(element).children('.dms1120').children('.thedmsBrowseDates').children('.thedmsEventDate')
+                .children('strong').children('a').text();
 
-            const tempDate = $(element).children('.dms1120').children('.thedmsBrowseDates').children('.thedmsEventDate')
-            .children('strong').children('a').text();
+                const tempDateArray = tempDate.split(' ');
+                const dateYear = tempDateArray[tempDateArray.length - 1];
 
-            const tempDateArray = tempDate.split(' ');
-            const dateYear = tempDateArray[tempDateArray.length - 1];
+                    const startDate = tempDate.slice(0, tempDate.indexOf('-'));
+                    const endDate = tempDate.slice(tempDate.indexOf('-') + 2);
+                    const startDateArray = startDate.split(' ');
+                    const endDateArray = endDate.split(' ');
+                    // console.log(endDateArray);
 
-                const startDate = tempDate.slice(0, tempDate.indexOf('-'));
-                const endDate = tempDate.slice(tempDate.indexOf('-') + 2);
-                const startDateArray = startDate.split(' ');
-                const endDateArray = endDate.split(' ');
-                // console.log(endDateArray);
+                    const startDateFormat = moment().set({ 
+                        year: dateYear,
+                        month: startDateArray[2],
+                        date: startDateArray[1],
+                    }).format('YYYY-MM-D');
 
-                const startDateFormat = moment().set({ 
-                    year: dateYear,
-                    month: startDateArray[2],
-                    date: startDateArray[1],
-                }).format('YYYY-MM-D');
+                    let endDateFormat = '';
 
-                let endDateFormat = '';
+                if (tempDate.indexOf('-') > -1) {
+                    endDateFormat = moment().set({ 
+                        year: dateYear,
+                        month: endDateArray[2],
+                        date: endDateArray[1],
+                    }).format('YYYY-MM-D');
 
-            if (tempDate.indexOf('-') > -1) {
-                endDateFormat = moment().set({ 
-                    year: dateYear,
-                    month: endDateArray[2],
-                    date: endDateArray[1],
-                }).format('YYYY-MM-D');
+                }
 
-            }
+                getDetails(eventLink)
+                    .then((results) => {
 
-            getDetails(eventLink)
-                .then((results) => {
+                        const description = results.description;
+                        const image = results.image;
 
-                    const description = results.description;
-                    const image = results.image;
-
-                    contentArray.push({
-                        title,
-                        description,
-                        image,
-                        location,
-                        date: startDateFormat + ' ' + endDateFormat,
-                    });
-                   resolve();
-                })
-        });
+                        contentArray.push({
+                            title,
+                            description,
+                            image,
+                            location,
+                            date: startDateFormat + ' ' + endDateFormat,
+                        });
+                    resolve();
+                    })
+            });
+        } else {
+            console.log('length was 0, resolving');
+            resolve();
+        }
 
     })
     return promise;
