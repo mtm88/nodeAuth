@@ -53,13 +53,18 @@ phantom.create()
             .then(() => {
                 console.log(`page ${pagesCount} completed`);
                 pagesCount++;
+                const lastEventDate = contentArray[contentArray.length - 1].startDate;
+                const timeNow = moment().add(1, 'M');
                 if (pagesCount === lastPage || lastPage === undefined) {
                     console.log(`last page: ${pagesCount}`);
                     res.json(contentArray);
+                } else if (moment(lastEventDate).isAfter()) {
+                    console.log('Event date is due next month, finishing.');
+                    res.json(contentArray);
                 } else {
                     processEvents(pagesCount);
-                }
-            })
+                    }
+            });
 
         // if (infoFrame.length > 0) {
         //     processResults(infoFrame)
@@ -140,7 +145,8 @@ function processResults(infoFrame) {
                             description,
                             image,
                             location,
-                            date: startDateFormat + ' ' + endDateFormat,
+                            startDate: startDateFormat,
+                            endDate: endDateFormat,
                         });
                     resolve();
                     })
