@@ -15,6 +15,7 @@ const firstdirectarena = require('./eventsources/firstdirectarena');
 const visitleeds = require('./eventsources/visitleeds');
 const ticketarena = require('./eventsources/ticketarena');
 const eventbrite = require('./eventsources/eventbrite');
+const lufc = require('./eventsources/lufc');
 // const skiddle = require('./eventsources/skiddle');
 
 app.get('/leeds-list', leedsList.process);
@@ -23,6 +24,7 @@ app.get('/firstdirectarena', firstdirectarena.process);
 app.get('/visitleeds', visitleeds.process);
 app.get('/ticketarena', ticketarena.process);
 app.get('/eventbrite', eventbrite.process);
+app.get('/lufc', lufc.process);
 // app.get('/skiddle', skiddle.process);
 
 
@@ -46,7 +48,7 @@ function processAll(req, res) {
 
 let newEventsArray = [];
 
-const sourcesArray = ['firstdirectarena', 'leeds-list', 'theo2', 'ticketarena']; // visitleeds
+const sourcesArray = ['firstdirectarena', 'leeds-list', 'theo2', 'ticketarena', 'eventbrite', 'visitleeds']; // visitleeds
 const sourcesCount = sourcesArray.length;
 let actualSource = 0;
 

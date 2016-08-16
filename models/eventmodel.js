@@ -9,6 +9,7 @@ var eventSchema = new Schema ({
     image: String,
     startDate: String,
     endDate: String,
+    time: String,
     price: Number,
     urls: [String],
     type: String,

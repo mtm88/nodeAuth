@@ -23,9 +23,10 @@ getPageCount()
                         startDate: tempVar.start.local,
                         endDate: tempVar.end.local,
                         thumbnailImage,
-                        location: 'Leeds' // temporary?
+                        location: 'Leeds', // temporary?
+                        surce: 'eventBrite',
                     });
-                    console.log(`${i} / ${resolvedData.length - 1}`);
+                    // console.log(`${i} / ${resolvedData.length - 1}`);
                     if (i === resolvedData.length - 1) {
                         res.json(eventsArray);
                     }
@@ -63,7 +64,7 @@ function getData(pageCount) {
                 if (!error) {
                     tempEventArray = tempEventArray.concat(JSON.parse(response.body).events);
                     pagesAnalysed++;
-                    console.log(`on page ${i}`);
+                    // console.log(`on page ${i}`);
                     if (pagesAnalysed === pageCount) {
                         resolve(tempEventArray);
                     }
@@ -94,7 +95,7 @@ function getPageCount() {
         request(queryParams, (error, response) => {
             if (!error) {
                 const pageCount = JSON.parse(response.body).pagination.page_count;
-                console.log(`pageCount: ${pageCount}`);
+                // console.log(`pageCount: ${pageCount}`);
                 resolve(pageCount);
             } else if (error) reject(`error: ${error}`);
             else {

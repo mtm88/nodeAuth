@@ -33,7 +33,6 @@ exports.process = function(req, res) {
                 const tempPrice = rightPanel.find('.event-price').children('.ticket-cost').text().trim();
                 const price = tempPrice.slice(tempPrice.indexOf('£'));
                 filteredDate[2] = filteredDate[2].replace(/\D/g,'');
-                console.log(price);
 
                 const dateMoment = moment().set({ 
                     year: filteredDate[2],

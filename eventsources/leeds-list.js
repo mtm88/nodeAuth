@@ -76,6 +76,7 @@ exports.process = function(req, res) {
                                 startDate: dateMoment,
                                 time: defineMornEvening,
                                 source: 'Leeds-list',
+                                ticketLink: 'http://leeds-list.com/whats-on/', // there's no nested views
                             });
                             // console.log(`pushing ${title}`);
                         });  
