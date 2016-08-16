@@ -9,6 +9,7 @@
     "express": "latest",
     "fast-levenshtein": "^1.1.4",
     "moment": "^2.14.1",
+    "mongoose-text-search": "0.0.2",
     "phantom": "^2.1.15",
     "promise": "^7.1.1",
     "request": "latest",

@@ -15,7 +15,14 @@ var eventSchema = new Schema ({
     location: String,
     venue: String,
     genre: String,
+    source: String,
     tags: [String],
+    id: String,
+    ticketLink: String,
 });
+
+ eventSchema.index({
+    title: 'text',
+  });
 
 module.exports = mongoose.model('event', eventSchema);

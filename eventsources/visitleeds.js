@@ -135,6 +135,7 @@ function processResults(infoFrame) {
                             location,
                             startDate: startDateFormat,
                             endDate: endDateFormat,
+                            source: 'Visit Leeds',
                         });
                     resolve();
                     })

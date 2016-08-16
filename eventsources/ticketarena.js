@@ -70,6 +70,7 @@ function getResults(lastPage) {
                                 location,
                                 startDate,
                                 endDate,
+                                source: 'Ticket Arena',
                             });
                             if (contentArray.length === totalEventsLength) {
                                 resolve(contentArray);

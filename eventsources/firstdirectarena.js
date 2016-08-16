@@ -29,7 +29,11 @@ exports.process = function(req, res) {
                 const description = rightPanel.children('.event-list-desc').children('.event-list-desc-padd').find('p').text();
                 const date = rightPanel.children('.event-list-base').children('.event-list-base-dates').children('.dates').text().trim().split(' ');
                 const filteredDate = date.filter((n) => { return n != '' }).slice(0, 3);
+                const ticketLink = rightPanel.find('.buttonprimaryouter').children('a').attr('href');
+                const tempPrice = rightPanel.find('.event-price').children('.ticket-cost').text().trim();
+                const price = tempPrice.slice(tempPrice.indexOf('£'));
                 filteredDate[2] = filteredDate[2].replace(/\D/g,'');
+                console.log(price);
 
                 const dateMoment = moment().set({ 
                     year: filteredDate[2],
@@ -42,8 +46,10 @@ exports.process = function(req, res) {
                     description,
                     image,
                     eventLink,
-                    location: 'First Direct Arena',
                     startDate: dateMoment,
+                    source: 'First Direct Arena',
+                    ticketLink,
+                    price,
                 });
 
                 processedEvents++;

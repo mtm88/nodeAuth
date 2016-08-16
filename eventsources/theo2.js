@@ -98,6 +98,7 @@ function processEvents(html) {
                     image,
                     location,
                     startDate: date,
+                    source: 'the o2',
                 });
 
                 processedEvent++;

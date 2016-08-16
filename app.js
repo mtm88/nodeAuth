@@ -3,6 +3,7 @@
 const express = require('express');
 const app     = express();
 const mongoose = require('mongoose');
+const textSearch = require('mongoose-text-search');
 const request = require('request');
 const levenshtein = require('fast-levenshtein');
 const _ = require('underscore');
@@ -13,6 +14,7 @@ const theo2 = require('./eventsources/theo2');
 const firstdirectarena = require('./eventsources/firstdirectarena');
 const visitleeds = require('./eventsources/visitleeds');
 const ticketarena = require('./eventsources/ticketarena');
+const eventbrite = require('./eventsources/eventbrite');
 // const skiddle = require('./eventsources/skiddle');
 
 app.get('/leeds-list', leedsList.process);
@@ -20,6 +22,7 @@ app.get('/theo2', theo2.process);
 app.get('/firstdirectarena', firstdirectarena.process);
 app.get('/visitleeds', visitleeds.process);
 app.get('/ticketarena', ticketarena.process);
+app.get('/eventbrite', eventbrite.process);
 // app.get('/skiddle', skiddle.process);
 
 
@@ -60,7 +63,7 @@ let actualSource = 0;
                 if (actualSource === sourcesCount) {
                     console.log('received data from all sources');
                     // res.json(eventsArray);
-                    getDataFromDB(newEventsArray, analyzeEvents);
+                    analyzeEvents(newEventsArray);
                     console.log(`New events count: ${newEventsArray.length}`);
                 }
 
@@ -76,57 +79,91 @@ let actualSource = 0;
 }
 
 
-function getDataFromDB(newEventsArray, callback) {
-        eventModel.find({}, (error, resultsFromMongo) => {
-            if (!error) {
-                console.log(`Data from Mongo ready to analyse`);
-                callback(newEventsArray, resultsFromMongo);
-            }
-            else {
-                throw error;
-            }
-        })
-}
-
-function analyzeEvents(newEventsArray, resultsFromMongo) {
+function analyzeEvents(newEventsArray) {
 
     for (let i = 0; i < newEventsArray.length; i++) {
-        console.log(`analysing ${i} event`);
-        checkSimilarity(newEventsArray[i], resultsFromMongo);
+        if (newEventsArray[i].title !== undefined) {
+            checkSimilarity(newEventsArray[i]);
+        }
     }
     
 }
 
 
-function checkSimilarity(event, resultsFromMongo) {
+function checkSimilarity(event) {
 
-        if (!_.isEmpty(resultsFromMongo)) {
-            for (let i = 0; i < resultsFromMongo.length; i++) {
-                if (event.title !== undefined && resultsFromMongo[i].title !== undefined) {
 
-                    levenshtein.getAsync(event.title, resultsFromMongo[i].title, (error, distance) => {
-                        console.log(distance);
-                        // if it's definately a different event, push it
-                        if (distance > 5) {
-                            addToMongo(event);
-                        }
+eventModel.aggregate([
+    { 
+        "$match": { 
+               "$text": { 
+                     "$search": `${event.title}`
+                } 
+         } 
+    },
+    { 
+         "$project": { 
+               "_id": 0, 
+               "score": { 
+                     "$meta": "textScore", 
+                },
+                "title": 1,
+                "startDate": 1, 
+                "source": 1,
+          } 
+     },
+     { 
+          "$match": { 
+                "score": { "$gt": 1.4 } 
+           } 
+     }
+]).exec((err, results) => {
 
-                        if (distance < 3 && distance > 0) {
-                            results.push({ firstTitle: event.title, secondTitle: resultsFromMongo[i].title });
-                            if (i === resultsFromMongo.length -1) {
-                                console.log(results);
-                            }
-                        }
-                    }), {
-                        progress: (percentComplete) => {
-                            console.log(`${percentComplete}% completed so far...`);
-                        }
-                    }
-                }
+    if (err) {
+        console.log(err);
+    } else {
+        // console.log(`was looking for ${event.title} ${event.source}`);
+        // console.log('RESULTS FROM SINGLE SEARCH: ');
+        const filteredByDate = results.filter((n) => { return n.startDate === event.startDate });
+            if (filteredByDate.length > 1) {
+                console.log(filteredByDate);
             }
-        } else {
-            addToMongo(event);
-        }
+    }
+
+
+})
+
+
+
+
+    // eventModel.find(
+    // { $text:
+    //      { $search: event.title }
+    // },
+    // { score: 
+    //     { $meta: 'textScore' }
+    // }
+    // ).sort(
+    // { score:
+    //      { $meta: "textScore" }
+    // }).exec(function(err, results) {
+        // if (err) {
+        //     console.log(err);
+        // } else if (_.isEmpty(results)) {
+        //     console.log('found none, adding');
+        //     addToMongo(event);
+        // } else {
+        //     if (results.length > 1) {
+        //             console.log(`was looking for ${event.title}`);
+        //             console.log('RESULTS FROM SINGLE SEARCH: ');
+        //             results.forEach((result) => {
+        //                 console.log(result.score);
+        //                 console.log(result.location);
+        //             });
+        //         }
+        // }
+    // });
+    
 
 }
 
@@ -144,6 +181,9 @@ function addToMongo(event) {
         // urls: [String],
         // type: String,
         location: event.location,
+        source: event.source,
+        id: event.id,
+        ticketLink: event.ticketLink,
         // venue: String,
         // genre: String,
         // tags: [String],

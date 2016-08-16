@@ -74,7 +74,8 @@ exports.process = function(req, res) {
                                 image,
                                 location,
                                 startDate: dateMoment,
-                                time: defineMornEvening
+                                time: defineMornEvening,
+                                source: 'Leeds-list',
                             });
                             // console.log(`pushing ${title}`);
                         });  
