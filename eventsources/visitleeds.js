@@ -44,39 +44,27 @@ phantom.create()
         });
         const pagesArray = tempPagesArray.filter((n) => { return !isNaN(n) });
         lastPage = pagesArray[pagesArray.length - 1];
-        console.log(`setting last page to ${lastPage}`);
+        // console.log(`setting last page to ${lastPage}`);
 
         const infoFrame = $('#thedmsMain').children('#thedmsListings').children('.thedmsBrowseRow');
-        console.log(`length of events: ${infoFrame.length}`);
+        // console.log(`length of events: ${infoFrame.length}`);
 
         processResults(infoFrame)
             .then(() => {
-                console.log(`page ${pagesCount} completed`);
+                // console.log(`page ${pagesCount} completed`);
                 pagesCount++;
                 const lastEventDate = contentArray[contentArray.length - 1].startDate;
                 const timeNow = moment().add(1, 'M');
                 if (pagesCount === lastPage || lastPage === undefined) {
-                    console.log(`last page: ${pagesCount}`);
+                    // console.log(`last page: ${pagesCount}`);
                     res.json(contentArray);
                 } else if (moment(lastEventDate).isAfter()) {
-                    console.log('Event date is due next month, finishing.');
+                    // console.log('Event date is due next month, finishing.');
                     res.json(contentArray);
                 } else {
                     processEvents(pagesCount);
                     }
             });
-
-        // if (infoFrame.length > 0) {
-        //     processResults(infoFrame)
-        //         .then(() => {
-        //             console.log(`page ${pagesCount} completed`);
-        //             pagesCount++;
-        //             processEvents(pagesCount);
-        //         });
-        // }   else {
-        //     console.log(`last page: ${pagesCount}`);
-        //     res.json(contentArray);
-        // }
 
         sitepage.close();
         phInstance.exit();
@@ -152,7 +140,7 @@ function processResults(infoFrame) {
                     })
             });
         } else {
-            console.log('length was 0, resolving');
+            // console.log('length was 0, resolving');
             resolve();
         }
 

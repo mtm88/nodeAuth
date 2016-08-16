@@ -19,7 +19,7 @@ exports.process = function(req, res) {
             const lastPage = parseInt(pageString.slice(tempIndex + 2).replace(/ /g,'')); 
             getResults(lastPage)
                 .then((results) => {
-                    console.log(`Total amount of events: ${results.length}`);
+                    // console.log(`Total amount of events: ${results.length}`);
                     results.unshift({ eventsCount: results.length });
                     res.json(results);
                 });
@@ -34,8 +34,8 @@ exports.process = function(req, res) {
     const promise = new Promise((resolve) => {
     for (let i = 1; i <= lastPage; i++) {
         //pages on this website switch on adding 24 each page -> /index/0, /index/24, /index/48
-        console.log(`processing page: ${i}`);
-        console.log(`pageLinkToProcess ${pageLinkToProcess}`);
+        // console.log(`processing page: ${i}`);
+        // console.log(`pageLinkToProcess ${pageLinkToProcess}`);
         const url = `http://www.theo2.co.uk/events/index/${pageLinkToProcess}`;
         request(url, (error, response, html) => {
 
@@ -43,12 +43,12 @@ exports.process = function(req, res) {
 
                 processEvents(html)
                     .then((processedEvents) => {
-                        console.log(`events for page ${i} completed`)
+                        // console.log(`events for page ${i} completed`);
                         contentArray = contentArray.concat(processedEvents);
                         processedPages++;
-                        console.log(`processed pages: ${processedPages}`);
+                        // console.log(`processed pages: ${processedPages}`);
                         if (processedPages === lastPage) {
-                            console.log('all done, sending response');
+                            // console.log('all done, sending response');
                             resolve(contentArray);
                         }
                     });
@@ -73,7 +73,7 @@ function processEvents(html) {
     let processedEvent = 0;
     const eventsPromise = new Promise((resolveEvents) => {
         const tempArray = [];
-        console.log('in eventsPromise, length: ' + events.length);
+        // console.log('in eventsPromise, length: ' + events.length);
         events.each((index, element) => {
             const info = $(element).find('.info > .date_title');
             const date = $(info).children('.date').children().first().attr('content');
@@ -97,7 +97,7 @@ function processEvents(html) {
                     description,
                     image,
                     location,
-                    date: date,
+                    startDate: date,
                 });
 
                 processedEvent++;

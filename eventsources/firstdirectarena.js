@@ -43,7 +43,7 @@ exports.process = function(req, res) {
                     image,
                     eventLink,
                     location: 'First Direct Arena',
-                    date: dateMoment,
+                    startDate: dateMoment,
                 });
 
                 processedEvents++;

@@ -14,10 +14,9 @@ exports.process = function(req, res) {
         if(!error) {
             const $ = cheerio.load(html);
             const lastPage = $('.goright').children('.last').attr('href').replace(/\D/g,'');
-            console.log(`Number of pages to process: ${lastPage}`);
+            // console.log(`Number of pages to process: ${lastPage}`);
             getResults(lastPage)
             .then((results) => {
-                console.log(results);
                 res.json(results);
             });
         }
@@ -33,7 +32,7 @@ function getResults(lastPage) {
     const promise = new Promise((resolve) => {
         
         for (let i = 1; i <= lastPage; i++) {
-            console.log(`processing page ${i}`);
+            // console.log(`processing page ${i}`);
             const url = `http://www.ticketarena.co.uk/places/leeds/index.html?page=${i}`;
             
             request(url, (error, response, html) => {
@@ -42,7 +41,7 @@ function getResults(lastPage) {
 
                 const events = $('.eventresults').children('.itemwrap');
                 totalEventsLength += events.length;
-                console.log(`events to process: ${events.length}`);
+                // console.log(`events to process: ${events.length}`);
                 events.each((index, element) => {
 
                     const title = $(element).children('.event-block').children('.event-text-container')
