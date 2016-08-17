@@ -132,6 +132,7 @@ function processResults(infoFrame) {
                             title,
                             description,
                             image,
+                            thumbnailImage: image,
                             location,
                             startDate: startDateFormat,
                             endDate: endDateFormat,
