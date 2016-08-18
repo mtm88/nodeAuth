@@ -13,13 +13,13 @@ var eventSchema = new Schema ({
     price: Number,
     urls: [String],
     type: String,
-    location: String,
-    venue: String,
-    genre: String,
+    location: [String],
+    genre: [String],
     source: String,
     tags: [String],
     id: String,
     ticketLink: String,
+    teams: String,
 });
 
  eventSchema.index({

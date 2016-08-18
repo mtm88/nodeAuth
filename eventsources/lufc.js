@@ -40,6 +40,8 @@ exports.process = function(req, res) {
                     title,
                     startDate: dateMoment,
                     matchTime,
+                    teams,
+                    source: 'LUFC',
                 });
             }
 

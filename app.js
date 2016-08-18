@@ -8,16 +8,21 @@ const request = require('request');
 const levenshtein = require('fast-levenshtein');
 const _ = require('underscore');
 
-
+// EVENTS
 const leedsList = require('./eventsources/leeds-list');
 const theo2 = require('./eventsources/theo2');
 const firstdirectarena = require('./eventsources/firstdirectarena');
 const visitleeds = require('./eventsources/visitleeds');
 const ticketarena = require('./eventsources/ticketarena');
 const eventbrite = require('./eventsources/eventbrite');
+const leedsinspired = require('./eventsources/leedsinspired');
+const skiddle = require('./eventsources/skiddle');
+
+// SPORTS
 const lufc = require('./eventsources/lufc');
 const yorkshirecricket = require('./eventsources/yorkshirecricket');
-// const skiddle = require('./eventsources/skiddle');
+const yorkshirecarnegie = require('./eventsources/yorkshirecarnegie');
+const rabbithole = require('./eventsources/rabbithole');
 
 app.get('/leeds-list', leedsList.process);
 app.get('/theo2', theo2.process);
@@ -27,7 +32,10 @@ app.get('/ticketarena', ticketarena.process);
 app.get('/eventbrite', eventbrite.process);
 app.get('/lufc', lufc.process);
 app.get('/yorkshirecricket', yorkshirecricket.process);
-// app.get('/skiddle', skiddle.process);
+app.get('/leedsinspired', leedsinspired.process);
+app.get('/skiddle', skiddle.process);
+app.get('/yorkshirecarnegie', yorkshirecarnegie.process);
+app.get('/rabbithole', rabbithole.process);
 
 
 mongoose.connect('mongodb://localhost:27017');
@@ -44,32 +52,42 @@ const eventModel = require('./models/eventmodel');
 app.get('/process', processAll);
 
 
-const results = [];
-
 function processAll(req, res) {
 
 let newEventsArray = [];
 
-const sourcesArray = ['firstdirectarena', 'leeds-list', 'theo2', 'ticketarena', 'eventbrite', 'visitleeds']; // visitleeds
+const sourcesArray = [
+    'firstdirectarena',
+    'theo2',
+    'ticketarena',
+    // 'eventbrite',
+    'visitleeds', 
+    'yorkshirecricket',
+    'leedsinspired',
+    'skiddle',
+    'yorkshirecarnegie',
+    ];
 const sourcesCount = sourcesArray.length;
 let actualSource = 0;
 
-    for (let i = 0; i < sourcesArray.length; i++) {
-        const url = `http://localhost:8081/${sourcesArray[i]}`;
+    processSource(actualSource);
+
+    function processSource(actualSource) {
+        const url = `http://localhost:8081/${sourcesArray[actualSource]}`;
         console.log(`processing ${url}`);
 
-        request(url, (error, response, html) => {
+        request(url, (error, response) => {
             if (!error) {
-                console.log('Source processed succesfully.')
+                console.log(`${sourcesArray[actualSource]} processed succesfully.`)
                 newEventsArray = newEventsArray.concat(JSON.parse(response.body));
                 actualSource++;
-
+                console.log(`Status: ${actualSource} / ${sourcesCount}`);
                 if (actualSource === sourcesCount) {
                     console.log('received data from all sources');
                     // res.json(eventsArray);
                     analyzeEvents(newEventsArray);
                     console.log(`New events count: ${newEventsArray.length}`);
-                }
+                }   else processSource(actualSource);
 
 
             } else if (error) {
@@ -188,6 +206,7 @@ function addToMongo(event) {
         source: event.source,
         id: event.id,
         ticketLink: event.ticketLink,
+        teams: event.teams,
         // venue: String,
         // genre: String,
         // tags: [String],

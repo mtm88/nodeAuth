@@ -15,11 +15,11 @@ exports.process = function(req, res) {
             const $ = cheerio.load(html);
             const pageString = $('.item-surround').find('ul').children().text();
             const pagesCount = pageString.slice(pageString.lastIndexOf('123') + 4, pageString.indexOf('Next'));
-            // console.log(`Number of pages to process: ${pagesCount}`);
+            console.log(`Number of pages to process: ${pagesCount}`);
 
             getResults(pagesCount)
                 .then((results) => {
-                    // console.log(`Total amount of events: ${results.length}`);
+                    console.log(`Total amount of events: ${results.length}`);
                     results.unshift({ eventsCount: results.length });
                     res.json(results);
                 })
@@ -35,7 +35,7 @@ exports.process = function(req, res) {
                 const url = `http://leeds-list.com/whats-on/when/all/page/${i}`;
                 request(url, function(error, response, html){
                     if(!error){
-                        // console.log(`processing page ${i}`);
+                        console.log(`processing page ${i}`);
                         const $ = cheerio.load(html);
 
                         // const feature_item = $('.item-surround').children('.feature-item').text();
@@ -78,11 +78,12 @@ exports.process = function(req, res) {
                                 source: 'Leeds-list',
                                 ticketLink: 'http://leeds-list.com/whats-on/', // there's no nested views
                             });
-                            // console.log(`pushing ${title}`);
+                            console.log(`pushing ${title}`);
                         });  
-                        // console.log(`processed page: ${processedPages}`);
+                        console.log(`processed page: ${processedPages} / ${pagesCount}`);
                         processedPages++;
                         if (processedPages == pagesCount) {
+                            console.log('resolving');
                             resolve(contentArray);
                         }
                         
